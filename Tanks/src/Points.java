@@ -8,7 +8,7 @@ import javax.swing.*;
 
 public class Points extends JPanel {
 
-    private String FILENAME = "C:\\Users\\sivanov\\Desktop\\Homeworks\\Tanks\\backfire-effect.png";
+    private String FILENAME = "C:\\Users\\sivanov\\Desktop\\Homeworks\\Tanks\\gun.png";
     private int SOLAR_RADIUS = 50;
     private int SOLAR_POSITION_X = 50;
     private int SOLAR_POSITION_Y = 50;
