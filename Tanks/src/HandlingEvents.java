@@ -12,6 +12,7 @@ public class HandlingEvents implements Runnable {
     JFrame frame;
     int myX = 400;
     int myAngle = 0;
+    int myX0, myAngle0;
     Canvas canvas;
     BufferStrategy bufferStrategy;
     private SpriteSheet spriteSheet;
@@ -24,12 +25,14 @@ public class HandlingEvents implements Runnable {
     private int IMAGE_WIDTH = 105;
     private int IMAGE_HEIGHT = 80;
     private int IMAGE_VERTICAL_OFFSET = 50;
-    private int SCREEN_WIDTH = 1000;
+    private int SCREEN_WIDTH = 1200;
     private int SCREEN_HEIGHT = 700;
     private boolean fire = false;
     int time = 0;
 
-    private int[] ground = new int[1000];
+    private int[][] offsetXY = {{90, 0}, {85, 5}, {80, 10}, {75, 15}, {70, 20}, {65, 25}, {60, 26}, {55, 27}, {50, 29}, {45, 31}, {40, 33}, {35, 35}, {30, 37}, {25, 38}, {20, 40}, {15, 43}, {10, 45}, {5, 48}, {0, 50}};
+    private int[] ground = new int[SCREEN_WIDTH];
+    private int CRATER_RADIUS = 100;
 
     public void defineGround() {
         double consts = 100;
@@ -92,6 +95,7 @@ public class HandlingEvents implements Runnable {
 
         canvas.createBufferStrategy(2);
         bufferStrategy = canvas.getBufferStrategy();
+        canvas.requestFocus();
     }
 
     public void run() {
@@ -124,26 +128,53 @@ public class HandlingEvents implements Runnable {
     protected void Paint(Graphics2D g) {
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(FILENAME)));
-            g.drawImage(spriteSheet.crop(myAngle * IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT), myX, ground[myX] - IMAGE_VERTICAL_OFFSET, null);
+            g.drawImage(spriteSheet.crop((myAngle / 5) * IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT), myX, ground[myX] - IMAGE_VERTICAL_OFFSET, null);
         } catch (IOException e) {
             e.printStackTrace();
         }
         if (fire) {
             g.setColor(Color.red);
-            g.fillOval(myX + IMAGE_WIDTH + 5 * time, ground[myX] - 10 * myAngle, 10, 10);
+            g.fillOval(ballCoord()[0], ballCoord()[1], 10, 10);
         }
     }
+
+    int[] ballCoord() {
+        int x0 = myX0 + offsetXY[myAngle0 / 5][0];
+        int y0 = ground[myX0] - offsetXY[myAngle0 / 5][1];
+
+        int v0 = 100;
+        double vX = v0 * Math.cos(myAngle0 * Math.PI / 180);
+        double vY = -v0 * Math.sin(myAngle0 * Math.PI / 180);
+
+        double gAcc = -9.80665;
+
+        int xCoord = (int) (x0 + vX * time / 10.0);
+        int yCoord = (int) (y0 + vY * time / 10.0 - gAcc * Math.pow(time / 10.0, 2));
+
+        //REDEFINE GROUND
+        if (yCoord - ground[xCoord] > 0) {
+            fire = false;
+            for (int x = xCoord - CRATER_RADIUS; x < xCoord + CRATER_RADIUS; x++) {
+                ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 500.0);
+            }
+
+        }
+
+        int[] temp = new int[]{xCoord, yCoord};
+        return temp;
+    }
+
 
     public void moveIt(KeyEvent evt) {
         switch (evt.getKeyCode()) {
             case KeyEvent.VK_UP:
-                if (myAngle <= 12) {
-                    myAngle += 1;
+                if (myAngle <= 90 - 5) {
+                    myAngle += 5;
                 }
                 break;
             case KeyEvent.VK_DOWN:
-                if (myAngle >= 1) {
-                    myAngle -= 1;
+                if (myAngle >= 5) {
+                    myAngle -= 5;
                 }
                 break;
             case KeyEvent.VK_LEFT:
@@ -159,6 +190,8 @@ public class HandlingEvents implements Runnable {
             case KeyEvent.VK_SPACE:
                 fire = true;
                 time = 0;
+                myX0 = myX;
+                myAngle0 = myAngle;
                 break;
         }
     }
