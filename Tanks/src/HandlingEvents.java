@@ -30,8 +30,8 @@ public class HandlingEvents implements Runnable {
 
     private int[] ground = new int[SCREEN_WIDTH];
 
-    player player1 = new player(300, 0, 70);
-    player player2 = new player(800, 180, 70);
+    player player1 = new player(300, 0, 70, 100);
+    player player2 = new player(800, 180, 70, 100);
     boolean player1Shooting = true;
 
     public void defineGround() {
@@ -101,22 +101,13 @@ public class HandlingEvents implements Runnable {
         }
     }
 
-    public static void main(String[] args) {
-        HandlingEvents ex = new HandlingEvents();
-        new Thread(ex).start();
-    }
-
     public void Paint() {
         Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
         g.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         drawGround(g, Color.green, SCREEN_HEIGHT);
         Landscape.drawSun(g, Color.yellow, SOLAR_POSITION_X, SOLAR_POSITION_Y, SOLAR_RADIUS);
 
-        Paint(g);
-        bufferStrategy.show();
-    }
 
-    protected void Paint(Graphics2D g) {
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(FILENAME)));
             g.drawImage(spriteSheet.crop((player1.myAngle / 5) * IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT), player1.myX - IMAGE_HORIZONTAL_OFFSET, ground[player1.myX] - IMAGE_VERTICAL_OFFSET, null);
@@ -125,14 +116,22 @@ public class HandlingEvents implements Runnable {
             e.printStackTrace();
         }
         if (fire) {
-            g.setColor(Color.red);
             int[] coordOfBall = ballCoord();
+            g.setColor(Color.red);
             g.fillOval(coordOfBall[0], coordOfBall[1], 10, 10);
         }
+
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Times New Roman", 10, 30));
+        g.drawString("Health: " + player1.health, (int)(0.1 * SCREEN_WIDTH), (int)(0.8 * SCREEN_HEIGHT));
+        g.drawString("Health: " + player2.health, (int)(0.8 * SCREEN_WIDTH), (int)(0.8 * SCREEN_HEIGHT));
+        g.drawString("Power: " + player1.myVelocity, (int)(0.1 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
+        g.drawString("Power: " + player2.myVelocity, (int)(0.8 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
+        bufferStrategy.show();
     }
 
-    int[] ballCoord() {
-        int v0 = 100; // Initial velocity
+
+    public int[] ballCoord() {
         int playerX0, playerAngle0, playerVelocity0;
 
         if (player1Shooting) {
@@ -157,7 +156,13 @@ public class HandlingEvents implements Runnable {
         int yCoord = (int) (y0 + vY * time / 10.0 - gAcc * Math.pow(time / 10.0, 2));
 
         //REDEFINE GROUND
-        if ((fire) && (yCoord >= ground[xCoord])) {
+        int p1X = player1.myX;
+        int p2X = player2.myX;
+        boolean condition = ((p1X - xCoord) * (p1X - xCoord) + (ground[p1X] - yCoord) * (ground[p1X] - yCoord) <= 500) ||
+                (p2X - xCoord) * (p2X - xCoord) + (ground[p2X] - yCoord) * (ground[p2X] - yCoord) <= 500;
+        System.out.println(condition);
+
+        if (fire && (yCoord >= ground[xCoord] || condition)) {
             fire = false;
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
@@ -201,12 +206,12 @@ public class HandlingEvents implements Runnable {
                     player1.myVelocity0 = player1.myVelocity;
                     break;
                 case KeyEvent.VK_PAGE_DOWN:
-                    if (player1.myVelocity >= 50) {
+                    if (player1.myVelocity > 50) {
                         player1.myVelocity -= 5;
                     }
                     break;
                 case KeyEvent.VK_PAGE_UP:
-                    if (player1.myVelocity <= 100) {
+                    if (player1.myVelocity < 200) {
                         player1.myVelocity += 5;
                     }
                     break;
@@ -241,13 +246,13 @@ public class HandlingEvents implements Runnable {
                     player2.myVelocity0 = player2.myVelocity;
                     break;
                 case KeyEvent.VK_PAGE_DOWN:
-                    if (player2.myVelocity >= 50) {
-                        player1.myVelocity -= 5;
+                    if (player2.myVelocity > 50) {
+                        player2.myVelocity -= 5;
                     }
                     break;
                 case KeyEvent.VK_PAGE_UP:
-                    if (player2.myVelocity <= 100) {
-                        player1.myVelocity += 5;
+                    if (player2.myVelocity < 200) {
+                        player2.myVelocity += 5;
                     }
                     break;
 
