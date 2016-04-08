@@ -4,13 +4,16 @@
 public class player {
     public int myX;
     public int myAngle;
+    public int myVelocity;
 
     public int myX0;
     public int myAngle0;
+    public int myVelocity0;
 
-    public player(int x, int angle){
+    public player(int x, int angle,int velocity){
         this.myX = x;
         this.myAngle = angle;
+        this.myVelocity=velocity;
     }
 
 }

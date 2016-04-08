@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.xml.bind.SchemaOutputResolver;
 
 public class HandlingEvents implements Runnable {
 
@@ -16,7 +15,7 @@ public class HandlingEvents implements Runnable {
     private SpriteSheet spriteSheet;
     boolean running = true;
 
-    private String FILENAME = "C:\\Users\\sivanov\\Desktop\\Homeworks\\Tanks - Copy\\players44.png";
+    private String FILENAME = "players44.png";
     private int SOLAR_RADIUS = 50;
     private int SOLAR_POSITION_X = 50;
     private int SOLAR_POSITION_Y = 50;
@@ -29,15 +28,10 @@ public class HandlingEvents implements Runnable {
     private boolean fire = false;
     int time = 0;
 
-    // offset player 1 for 0 degrees, 5 degrees, 10 degrees, ...
-    private int[][] offsetXY = {{90, 0}, {85, 5}, {80, 10}, {75, 15}, {70, 20}, {65, 25}, {60, 26}, {55, 27}, {50, 29}, {45, 31},
-            {40, 33}, {35, 35}, {30, 37}, {25, 38}, {20, 40}, {15, 43}, {10, 45}, {5, 48}, {0, 50},
-            {-5, 48}, {-10, 45}, {-15, 43}, {-20, 40}, {-25, 38}, {-30, 37}, {-35, 35}, {-40, 33},
-            {-45, 31}, {-50, 29}, {-55, 27}, {-60, 26}, {-65, 25}, {-70, 20}, {-75, 15}, {-80, 10}, {-85, 5}, {-90, 0}};
     private int[] ground = new int[SCREEN_WIDTH];
 
-    player player1 = new player(300, 0);
-    player player2 = new player(800, 180);
+    player player1 = new player(300, 0, 70);
+    player player2 = new player(800, 180, 70);
     boolean player1Shooting = true;
 
     public void defineGround() {
@@ -50,7 +44,6 @@ public class HandlingEvents implements Runnable {
             val2[i] = (r.nextInt(10) - 20.0) / SCREEN_WIDTH;
         }
 
-        //ground[0] = 7 * SCREEN_HEIGHT / 10;
         for (int i = 0; i < ground.length; i++) {
             ground[i] = 7 * SCREEN_HEIGHT / 10 + (int) (val2[0] + 0.5 * val1[1] * Math.sin(val1[0] - val2[1] * i) + 0.5 * val1[0] * Math.sin(val1[1] - val2[2] * i) + 0.5 * val1[2] * Math.sin(val1[2] + val2[3] * i));
         }
@@ -127,33 +120,36 @@ public class HandlingEvents implements Runnable {
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(FILENAME)));
             g.drawImage(spriteSheet.crop((player1.myAngle / 5) * IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT), player1.myX - IMAGE_HORIZONTAL_OFFSET, ground[player1.myX] - IMAGE_VERTICAL_OFFSET, null);
-            g.drawImage(spriteSheet.crop(((180 - player2.myAngle) / 5) * IMAGE_WIDTH, IMAGE_HEIGHT, (int) (1 * IMAGE_WIDTH), IMAGE_HEIGHT), player2.myX - IMAGE_HORIZONTAL_OFFSET, ground[player2.myX] - IMAGE_VERTICAL_OFFSET, null);
+            g.drawImage(spriteSheet.crop(((180 - player2.myAngle) / 5) * IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT), player2.myX - IMAGE_HORIZONTAL_OFFSET, ground[player2.myX] - IMAGE_VERTICAL_OFFSET, null);
         } catch (IOException e) {
             e.printStackTrace();
         }
         if (fire) {
             g.setColor(Color.red);
-            g.fillOval(ballCoord()[0], ballCoord()[1], 10, 10);
+            int[] coordOfBall = ballCoord();
+            g.fillOval(coordOfBall[0], coordOfBall[1], 10, 10);
         }
     }
 
     int[] ballCoord() {
         int v0 = 100; // Initial velocity
-        int playerX0, playerAngle0;
+        int playerX0, playerAngle0, playerVelocity0;
 
         if (player1Shooting) {
             playerX0 = player1.myX0;
             playerAngle0 = player1.myAngle0;
+            playerVelocity0 = player1.myVelocity0;
         } else {
             playerX0 = player2.myX0;
             playerAngle0 = player2.myAngle0;
+            playerVelocity0 = player2.myVelocity0;
         }
 
         int x0 = playerX0 + (int) (90 * Math.cos(playerAngle0 * Math.PI / 180));
         int y0 = ground[playerX0] - (int) (90 * Math.sin(playerAngle0 * Math.PI / 180));
 
-        double vX = v0 * Math.cos(playerAngle0 * Math.PI / 180);
-        double vY = -v0 * Math.sin(playerAngle0 * Math.PI / 180);
+        double vX = playerVelocity0 * Math.cos(playerAngle0 * Math.PI / 180);
+        double vY = -playerVelocity0 * Math.sin(playerAngle0 * Math.PI / 180);
 
         double gAcc = -9.80665; // Earth's gravity acceleration
 
@@ -161,8 +157,7 @@ public class HandlingEvents implements Runnable {
         int yCoord = (int) (y0 + vY * time / 10.0 - gAcc * Math.pow(time / 10.0, 2));
 
         //REDEFINE GROUND
-        System.out.println(xCoord);
-        if (yCoord - ground[xCoord] > 0 && fire) {
+        if ((fire) && (yCoord >= ground[xCoord])) {
             fire = false;
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
@@ -203,6 +198,17 @@ public class HandlingEvents implements Runnable {
                     time = 0;
                     player1.myX0 = player1.myX;
                     player1.myAngle0 = player1.myAngle;
+                    player1.myVelocity0 = player1.myVelocity;
+                    break;
+                case KeyEvent.VK_PAGE_DOWN:
+                    if (player1.myVelocity >= 50) {
+                        player1.myVelocity -= 5;
+                    }
+                    break;
+                case KeyEvent.VK_PAGE_UP:
+                    if (player1.myVelocity <= 100) {
+                        player1.myVelocity += 5;
+                    }
                     break;
             }
         } else {
@@ -232,7 +238,19 @@ public class HandlingEvents implements Runnable {
                     time = 0;
                     player2.myX0 = player2.myX;
                     player2.myAngle0 = player2.myAngle;
+                    player2.myVelocity0 = player2.myVelocity;
                     break;
+                case KeyEvent.VK_PAGE_DOWN:
+                    if (player2.myVelocity >= 50) {
+                        player1.myVelocity -= 5;
+                    }
+                    break;
+                case KeyEvent.VK_PAGE_UP:
+                    if (player2.myVelocity <= 100) {
+                        player1.myVelocity += 5;
+                    }
+                    break;
+
             }
         }
     }
