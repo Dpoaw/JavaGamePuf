@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.xml.bind.SchemaOutputResolver;
 
 public class HandlingEvents implements Runnable {
 
@@ -15,13 +16,14 @@ public class HandlingEvents implements Runnable {
     private SpriteSheet spriteSheet;
     boolean running = true;
 
-    private String FILENAME = "C:\\Users\\sivanov\\Desktop\\Homeworks\\Tanks - Copy\\cannon7.png";
+    private String FILENAME = "C:\\Users\\sivanov\\Desktop\\Homeworks\\Tanks - Copy\\players44.png";
     private int SOLAR_RADIUS = 50;
     private int SOLAR_POSITION_X = 50;
     private int SOLAR_POSITION_Y = 50;
-    private int IMAGE_WIDTH = 104 * 3 / 4;
-    private int IMAGE_HEIGHT = 100 * 3 / 4;
-    private int IMAGE_VERTICAL_OFFSET = 50;
+    private int IMAGE_WIDTH = 95;
+    private int IMAGE_HEIGHT = 95;
+    private int IMAGE_VERTICAL_OFFSET = 70;
+    private int IMAGE_HORIZONTAL_OFFSET = IMAGE_WIDTH / 2;
     private int SCREEN_WIDTH = 1200;
     private int SCREEN_HEIGHT = 700;
     private boolean fire = false;
@@ -30,10 +32,9 @@ public class HandlingEvents implements Runnable {
     // offset player 1 for 0 degrees, 5 degrees, 10 degrees, ...
     private int[][] offsetXY = {{90, 0}, {85, 5}, {80, 10}, {75, 15}, {70, 20}, {65, 25}, {60, 26}, {55, 27}, {50, 29}, {45, 31},
             {40, 33}, {35, 35}, {30, 37}, {25, 38}, {20, 40}, {15, 43}, {10, 45}, {5, 48}, {0, 50},
-            {5, 48}, {10, 45}, {15, 43}, {20, 40}, {25, 38}, {30, 37}, {35, 35}, {40, 33},
-            {45, 31}, {50, 29}, {55, 27}, {60, 26}, {65, 25}, {70, 20}, {75, 15}, {80, 10}, {85, 5}, {90, 0}};
+            {-5, 48}, {-10, 45}, {-15, 43}, {-20, 40}, {-25, 38}, {-30, 37}, {-35, 35}, {-40, 33},
+            {-45, 31}, {-50, 29}, {-55, 27}, {-60, 26}, {-65, 25}, {-70, 20}, {-75, 15}, {-80, 10}, {-85, 5}, {-90, 0}};
     private int[] ground = new int[SCREEN_WIDTH];
-    private int CRATER_RADIUS = 100;
 
     player player1 = new player(300, 0);
     player player2 = new player(800, 180);
@@ -49,9 +50,9 @@ public class HandlingEvents implements Runnable {
             val2[i] = (r.nextInt(10) - 20.0) / SCREEN_WIDTH;
         }
 
-        ground[0] = 7 * SCREEN_HEIGHT / 10;
-        for (int i = 1; i < ground.length; i++) {
-            ground[i] = ground[0] + (int) (val2[0] + 0.5 * val1[1] * Math.sin(val1[0] - val2[1] * i) + 0.5 * val1[0] * Math.sin(val1[1] - val2[2] * i) + 0.5 * val1[2] * Math.sin(val1[2] + val2[3] * i));
+        //ground[0] = 7 * SCREEN_HEIGHT / 10;
+        for (int i = 0; i < ground.length; i++) {
+            ground[i] = 7 * SCREEN_HEIGHT / 10 + (int) (val2[0] + 0.5 * val1[1] * Math.sin(val1[0] - val2[1] * i) + 0.5 * val1[0] * Math.sin(val1[1] - val2[2] * i) + 0.5 * val1[2] * Math.sin(val1[2] + val2[3] * i));
         }
     }
 
@@ -125,8 +126,8 @@ public class HandlingEvents implements Runnable {
     protected void Paint(Graphics2D g) {
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(FILENAME)));
-            g.drawImage(spriteSheet.crop((player1.myAngle / 5) * IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT), player1.myX, ground[player1.myX] - IMAGE_VERTICAL_OFFSET, null);
-            g.drawImage(spriteSheet.crop(((player2.myAngle - 90) / 5) * IMAGE_WIDTH, 10 + IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT), player2.myX, ground[player2.myX] - IMAGE_VERTICAL_OFFSET, null);
+            g.drawImage(spriteSheet.crop((player1.myAngle / 5) * IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT), player1.myX - IMAGE_HORIZONTAL_OFFSET, ground[player1.myX] - IMAGE_VERTICAL_OFFSET, null);
+            g.drawImage(spriteSheet.crop(((180 - player2.myAngle) / 5) * IMAGE_WIDTH, IMAGE_HEIGHT, (int) (1 * IMAGE_WIDTH), IMAGE_HEIGHT), player2.myX - IMAGE_HORIZONTAL_OFFSET, ground[player2.myX] - IMAGE_VERTICAL_OFFSET, null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -148,8 +149,8 @@ public class HandlingEvents implements Runnable {
             playerAngle0 = player2.myAngle0;
         }
 
-        int x0 = playerX0 + offsetXY[playerAngle0 / 5][0];
-        int y0 = ground[playerX0] - offsetXY[playerAngle0 / 5][1];
+        int x0 = playerX0 + (int) (90 * Math.cos(playerAngle0 * Math.PI / 180));
+        int y0 = ground[playerX0] - (int) (90 * Math.sin(playerAngle0 * Math.PI / 180));
 
         double vX = v0 * Math.cos(playerAngle0 * Math.PI / 180);
         double vY = -v0 * Math.sin(playerAngle0 * Math.PI / 180);
@@ -160,9 +161,10 @@ public class HandlingEvents implements Runnable {
         int yCoord = (int) (y0 + vY * time / 10.0 - gAcc * Math.pow(time / 10.0, 2));
 
         //REDEFINE GROUND
+        System.out.println(xCoord);
         if (yCoord - ground[xCoord] > 0 && fire) {
             fire = false;
-            for (int x = Math.max(0, xCoord - CRATER_RADIUS); x < Math.min(SCREEN_WIDTH, xCoord + CRATER_RADIUS); x++) {
+            for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
             }
             player1Shooting = !player1Shooting; // Now the other tank is shooting
