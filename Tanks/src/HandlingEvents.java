@@ -158,7 +158,7 @@ public class HandlingEvents implements Runnable {
 
 
     public int[] ballCoord() {
-        int playerX0, playerAngle0, playerVelocity0, playerHealth;
+        int playerX0, playerAngle0, playerVelocity0;
 
         if (player1Shooting) {
             playerX0 = player1.myX0;
@@ -197,9 +197,11 @@ public class HandlingEvents implements Runnable {
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
             }
+            //if bullet is in area of player1
             if((xCoord<=player1.myX+50)&&(xCoord>=player1.myX-50)&&(yCoord>=ground[player1.myX]-50)&&(yCoord<=ground[player1.myX]+50)){
                 player1.health-=20;
             }else{
+                //if bullet is in area of player2
                 if((xCoord<=player2.myX+50)&&(xCoord>=player2.myX-50)&&(yCoord>=ground[player2.myX]-50)&&(yCoord<=ground[player2.myX]+50)){
                     player2.health-=20;
                 }
