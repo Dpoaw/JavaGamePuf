@@ -93,13 +93,14 @@ public class Game implements Runnable {
             }
         }
         //this formula to check if player is hitted DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> condition is always TRUE
-        if (Math.sqrt((this.player01.x - this.bullet.xCoord)) + Math.sqrt((this.groundPoints[this.player01.x] - this.bullet.yCoord)) <= 500) {
-            //this.player01.health -= 20;
-            //this.bulletCreated = false;
+        if (Math.pow((this.player02.x-this.bullet.xCoord),2)+Math.pow((this.player02.y-this.bullet.yCoord),2)<=2500) {
+            this.bulletCreated = false;
+            this.player01.health -= 20;
+
         }
-        if (Math.sqrt((this.player02.x - this.bullet.xCoord)) + Math.sqrt((this.groundPoints[this.player02.x] - this.bullet.yCoord)) <= 500) {
-            //this.player02.health -= 20;
-            //this.bulletCreated = false;
+        if (Math.pow((this.player01.x-this.bullet.xCoord),2)+Math.pow((this.player01.y-this.bullet.yCoord),2)<=2500) {
+            this.bulletCreated = false;
+            this.player02.health -= 20;
         }
     }
 
@@ -143,6 +144,8 @@ public class Game implements Runnable {
         //drawing players
         this.player01.render(this.graphics);//here we call player01 -> he draws itself, counts his current condition with his tick() method
         this.player02.render(this.graphics);// -> player02
+        //this.graphics.drawRect(this.player01.x-60,this.groundPoints[this.player01.x]-50, 100,50);
+        //this.graphics.drawRect(this.player02.x-60, this.groundPoints[this.player02.x]-50,100,50);
         //drawing bullet, if it has been created!!! -> to avoid exceptions
         if (this.bulletCreated) {
             this.bullet.render(graphics);
