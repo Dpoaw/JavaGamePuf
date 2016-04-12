@@ -1,8 +1,6 @@
 import java.awt.*;
 
-/**
- * Created by sivanov on 7.4.2016 г..
- */
+
 public class Landscape {
     static void drawSun(Graphics2D g2d, Color clr, int xCoord, int yCoord, int radius) {
         int rayLength = 3 * radius;

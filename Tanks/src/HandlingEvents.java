@@ -1,10 +1,12 @@
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 
 public class HandlingEvents implements Runnable {
@@ -16,6 +18,8 @@ public class HandlingEvents implements Runnable {
     boolean running = true;
 
     private String FILENAME = "players44.png";
+    private String PLAYER1="player1.png";
+    private String PLAYER2="player2.png";
     private int SOLAR_RADIUS = 50;
     private int SOLAR_POSITION_X = 50;
     private int SOLAR_POSITION_Y = 50;
@@ -61,7 +65,7 @@ public class HandlingEvents implements Runnable {
 
     public HandlingEvents() {
         Dimension dimension = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
-        frame = new JFrame("Tanks");
+        frame = new JFrame("Chilli War");
         frame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         frame.setVisible(true);
         frame.setFocusable(true);
@@ -121,27 +125,51 @@ public class HandlingEvents implements Runnable {
             g.fillOval(coordOfBall[0], coordOfBall[1], 10, 10);
         }
 
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(PLAYER1)));
+            g.drawImage(spriteSheet.crop(0,0,47,80), (int)(0.05 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(PLAYER2)));
+            g.drawImage(spriteSheet.crop(0,0,41,70), (int)(0.9 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         g.setColor(Color.BLACK);
         g.setFont(new Font("Times New Roman", 10, 30));
-        g.drawString("Health: " + player1.health, (int)(0.1 * SCREEN_WIDTH), (int)(0.8 * SCREEN_HEIGHT));
-        g.drawString("Health: " + player2.health, (int)(0.8 * SCREEN_WIDTH), (int)(0.8 * SCREEN_HEIGHT));
+
+
+        g.drawString("Health: " + player1.health, (int)(0.1 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
+        g.drawString("Health: " + player2.health, (int)(0.8 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
+
         g.drawString("Power: " + player1.myVelocity, (int)(0.1 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
         g.drawString("Power: " + player2.myVelocity, (int)(0.8 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
+
+        g.drawString("Angle: " + player1.myAngle, (int)(0.1 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
+        g.drawString("Angle: " + player2.myAngle, (int)(0.8 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
+
         bufferStrategy.show();
     }
 
 
     public int[] ballCoord() {
-        int playerX0, playerAngle0, playerVelocity0;
+        int playerX0, playerAngle0, playerVelocity0, playerHealth;
 
         if (player1Shooting) {
             playerX0 = player1.myX0;
             playerAngle0 = player1.myAngle0;
             playerVelocity0 = player1.myVelocity0;
+
         } else {
             playerX0 = player2.myX0;
             playerAngle0 = player2.myAngle0;
             playerVelocity0 = player2.myVelocity0;
+
         }
 
         int x0 = playerX0 + (int) (90 * Math.cos(playerAngle0 * Math.PI / 180));
@@ -156,17 +184,27 @@ public class HandlingEvents implements Runnable {
         int yCoord = (int) (y0 + vY * time / 10.0 - gAcc * Math.pow(time / 10.0, 2));
 
         //REDEFINE GROUND
-        int p1X = player1.myX;
-        int p2X = player2.myX;
-        boolean condition = ((p1X - xCoord) * (p1X - xCoord) + (ground[p1X] - yCoord) * (ground[p1X] - yCoord) <= 500) ||
-                (p2X - xCoord) * (p2X - xCoord) + (ground[p2X] - yCoord) * (ground[p2X] - yCoord) <= 500;
+
+        boolean condition =
+                ((xCoord<=player1.myX+50)&&(xCoord>=player1.myX-50)&&(yCoord>=ground[player1.myX]-50)&&(yCoord<=ground[player1.myX]+50))||
+                        ((xCoord<=player2.myX+50)&&(xCoord>=player2.myX-50)&&(yCoord>=ground[player2.myX]-50)&&(yCoord<=ground[player2.myX]+50));
         System.out.println(condition);
+
+
 
         if (fire && (yCoord >= ground[xCoord] || condition)) {
             fire = false;
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
             }
+            if((xCoord<=player1.myX+50)&&(xCoord>=player1.myX-50)&&(yCoord>=ground[player1.myX]-50)&&(yCoord<=ground[player1.myX]+50)){
+                player1.health-=20;
+            }else{
+                if((xCoord<=player2.myX+50)&&(xCoord>=player2.myX-50)&&(yCoord>=ground[player2.myX]-50)&&(yCoord<=ground[player2.myX]+50)){
+                    player2.health-=20;
+                }
+            }
+
             player1Shooting = !player1Shooting; // Now the other tank is shooting
         }
 
