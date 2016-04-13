@@ -18,11 +18,11 @@ public class HandlingEvents implements Runnable {
     boolean running = true;
 
     private String FILENAME = "players44.png";
-    private String PLAYER1="player1.png";
-    private String PLAYER2="player2.png";
-    private String POWER="power.png";
-    private String HEARTH="hearth.png";
-    private String ANGLE="angle.png";
+    private String PLAYER1 = "player1.png";
+    private String PLAYER2 = "player2.png";
+    private String POWER = "power.png";
+    private String HEARTH = "hearth.png";
+    private String ANGLE = "angle.png";
     private int SOLAR_RADIUS = 50;
     private int SOLAR_POSITION_X = 50;
     private int SOLAR_POSITION_Y = 50;
@@ -30,6 +30,8 @@ public class HandlingEvents implements Runnable {
     private int IMAGE_HEIGHT = 95;
     private int IMAGE_VERTICAL_OFFSET = 70;
     private int IMAGE_HORIZONTAL_OFFSET = IMAGE_WIDTH / 2;
+    private int BALL_OFFSET_X = 10;
+    private int BALL_OFFSET_Y = 15;
     private int SCREEN_WIDTH = 1200;
     private int SCREEN_HEIGHT = 700;
     private boolean fire = false;
@@ -126,61 +128,63 @@ public class HandlingEvents implements Runnable {
             int[] coordOfBall = ballCoord();
             g.setColor(Color.red);
             g.fillOval(coordOfBall[0], coordOfBall[1], 10, 10);
+            g.fillOval(player1.myX, ground[player1.myX] - 10, 10, 10);
+            g.fillOval(player2.myX, ground[player2.myX], 10, 10);
         }
 
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(PLAYER1)));
-            g.drawImage(spriteSheet.crop(0,0,47,80), (int)(0.05 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 47, 80), (int) (0.05 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(PLAYER2)));
-            g.drawImage(spriteSheet.crop(0,0,41,70), (int)(0.9 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 41, 70), (int) (0.9 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(POWER)));
-            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.090 * SCREEN_WIDTH), (int)(0.80 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.090 * SCREEN_WIDTH), (int) (0.80 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(POWER)));
-            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.8 * SCREEN_WIDTH), (int)(0.80 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.8 * SCREEN_WIDTH), (int) (0.80 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(HEARTH)));
-            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.090 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.090 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(HEARTH)));
-            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.8 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.8 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(ANGLE)));
-            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.0908 * SCREEN_WIDTH), (int)(0.907 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.0908 * SCREEN_WIDTH), (int) (0.907 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(ANGLE)));
-            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.805 * SCREEN_WIDTH), (int)(0.907 * SCREEN_HEIGHT), null);
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.805 * SCREEN_WIDTH), (int) (0.907 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -189,14 +193,14 @@ public class HandlingEvents implements Runnable {
         g.setFont(new Font("Times New Roman", 10, 30));
 
 
-        g.drawString("" + player1.health, (int)(0.13 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
-        g.drawString("" + player2.health, (int)(0.84 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
+        g.drawString("" + player1.health, (int) (0.13 * SCREEN_WIDTH), (int) (0.9 * SCREEN_HEIGHT));
+        g.drawString("" + player2.health, (int) (0.84 * SCREEN_WIDTH), (int) (0.9 * SCREEN_HEIGHT));
 
-        g.drawString(""+player1.myVelocity, (int)(0.13 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
-        g.drawString(""+player2.myVelocity, (int)(0.84 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
+        g.drawString("" + player1.myVelocity, (int) (0.13 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT));
+        g.drawString("" + player2.myVelocity, (int) (0.84 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT));
 
-        g.drawString("" + player1.myAngle, (int)(0.13 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
-        g.drawString("" + (180-player2.myAngle), (int)(0.84 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
+        g.drawString("" + player1.myAngle, (int) (0.13 * SCREEN_WIDTH), (int) (0.95 * SCREEN_HEIGHT));
+        g.drawString("" + (180 - player2.myAngle), (int) (0.84 * SCREEN_WIDTH), (int) (0.95 * SCREEN_HEIGHT));
 
         bufferStrategy.show();
     }
@@ -216,9 +220,9 @@ public class HandlingEvents implements Runnable {
             playerVelocity0 = player2.myVelocity0;
 
         }
-
-        int x0 = playerX0 + (int) (90 * Math.cos(playerAngle0 * Math.PI / 180));
-        int y0 = ground[playerX0] - (int) (90 * Math.sin(playerAngle0 * Math.PI / 180));
+        
+        int x0 = playerX0 - BALL_OFFSET_X + (int) (40 * Math.cos(playerAngle0 * Math.PI / 180));
+        int y0 = ground[playerX0] - BALL_OFFSET_Y - (int) (30 * Math.sin(playerAngle0 * Math.PI / 180));
 
         double vX = playerVelocity0 * Math.cos(playerAngle0 * Math.PI / 180);
         double vY = -playerVelocity0 * Math.sin(playerAngle0 * Math.PI / 180);
@@ -231,10 +235,10 @@ public class HandlingEvents implements Runnable {
         //REDEFINE GROUND
 
         boolean condition =
-                ((xCoord<=player1.myX+50)&&(xCoord>=player1.myX-50)&&(yCoord>=ground[player1.myX]-50)&&(yCoord<=ground[player1.myX]+50))||
-                        ((xCoord<=player2.myX+50)&&(xCoord>=player2.myX-50)&&(yCoord>=ground[player2.myX]-50)&&(yCoord<=ground[player2.myX]+50));
+                ((xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50) && (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) ||
+                        ((xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) && (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50));
+        condition = false;
         System.out.println(condition);
-
 
 
         if (fire && (yCoord >= ground[xCoord] || condition)) {
@@ -243,12 +247,12 @@ public class HandlingEvents implements Runnable {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
             }
             //if bullet is in area of player1
-            if((xCoord<=player1.myX+50)&&(xCoord>=player1.myX-50)&&(yCoord>=ground[player1.myX]-50)&&(yCoord<=ground[player1.myX]+50)){
-                player1.health-=20;
-            }else{
+            if ((xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50) && (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) {
+                player1.health -= 20;
+            } else {
                 //if bullet is in area of player2
-                if((xCoord<=player2.myX+50)&&(xCoord>=player2.myX-50)&&(yCoord>=ground[player2.myX]-50)&&(yCoord<=ground[player2.myX]+50)){
-                    player2.health-=20;
+                if ((xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) && (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50)) {
+                    player2.health -= 20;
                 }
             }
 
