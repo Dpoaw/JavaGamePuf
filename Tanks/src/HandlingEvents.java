@@ -34,8 +34,10 @@ public class HandlingEvents implements Runnable {
     private int BALL_OFFSET_Y = 15;
     private int SCREEN_WIDTH = 1200;
     private int SCREEN_HEIGHT = 700;
+
     private boolean fire = false;
     int time = 0;
+    private int vTerminal = -100;
 
     private int[] ground = new int[SCREEN_WIDTH];
 
@@ -128,8 +130,6 @@ public class HandlingEvents implements Runnable {
             int[] coordOfBall = ballCoord();
             g.setColor(Color.red);
             g.fillOval(coordOfBall[0], coordOfBall[1], 10, 10);
-            g.fillOval(player1.myX, ground[player1.myX] - 10, 10, 10);
-            g.fillOval(player2.myX, ground[player2.myX], 10, 10);
         }
 
 
@@ -164,26 +164,15 @@ public class HandlingEvents implements Runnable {
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(HEARTH)));
             g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.090 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT), null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            spriteSheet = new SpriteSheet(ImageIO.read(new File(HEARTH)));
             g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.8 * SCREEN_WIDTH), (int) (0.85 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        try {
-            spriteSheet = new SpriteSheet(ImageIO.read(new File(ANGLE)));
-            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.0908 * SCREEN_WIDTH), (int) (0.907 * SCREEN_HEIGHT), null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(ANGLE)));
+            g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.0908 * SCREEN_WIDTH), (int) (0.907 * SCREEN_HEIGHT), null);
             g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.805 * SCREEN_WIDTH), (int) (0.907 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -201,6 +190,8 @@ public class HandlingEvents implements Runnable {
 
         g.drawString("" + player1.myAngle, (int) (0.13 * SCREEN_WIDTH), (int) (0.95 * SCREEN_HEIGHT));
         g.drawString("" + (180 - player2.myAngle), (int) (0.84 * SCREEN_WIDTH), (int) (0.95 * SCREEN_HEIGHT));
+
+        g.drawString(String.format("Terminal speed: %d m/s", Math.abs(vTerminal)), (int) (0.40 * SCREEN_WIDTH), (int) (0.95 * SCREEN_HEIGHT));
 
         bufferStrategy.show();
     }
@@ -220,7 +211,7 @@ public class HandlingEvents implements Runnable {
             playerVelocity0 = player2.myVelocity0;
 
         }
-        
+
         int x0 = playerX0 - BALL_OFFSET_X + (int) (40 * Math.cos(playerAngle0 * Math.PI / 180));
         int y0 = ground[playerX0] - BALL_OFFSET_Y - (int) (30 * Math.sin(playerAngle0 * Math.PI / 180));
 
@@ -229,8 +220,8 @@ public class HandlingEvents implements Runnable {
 
         double gAcc = -9.80665; // Earth's gravity acceleration
 
-        int xCoord = (int) (x0 + vX * time / 10.0);
-        int yCoord = (int) (y0 + vY * time / 10.0 - gAcc * Math.pow(time / 10.0, 2));
+        int xCoord = (int) (x0 + (vX * vTerminal / gAcc) * (1 - Math.exp((-gAcc * time / 10.0) / vTerminal)));
+        int yCoord = (int) (y0 + (vTerminal / gAcc) * (vY + vTerminal) * (1 - Math.exp((-gAcc * time / 10.0) / vTerminal)) - vTerminal * time / 10.0);
 
         //REDEFINE GROUND
 
@@ -265,6 +256,18 @@ public class HandlingEvents implements Runnable {
 
 
     public void moveIt(KeyEvent evt) {
+        if (!fire) {
+            switch (evt.getKeyCode()) {
+                case KeyEvent.VK_ADD:
+                    if (vTerminal > -100) vTerminal -= 10;
+                    break;
+                case KeyEvent.VK_SUBTRACT:
+                    if (vTerminal <= -20) vTerminal += 10;
+                    break;
+            }
+        }
+
+
         if (player1Shooting) {
             switch (evt.getKeyCode()) {
                 case KeyEvent.VK_UP:
