@@ -20,6 +20,9 @@ public class HandlingEvents implements Runnable {
     private String FILENAME = "players44.png";
     private String PLAYER1="player1.png";
     private String PLAYER2="player2.png";
+    private String POWER="power.png";
+    private String HEARTH="hearth.png";
+    private String ANGLE="angle.png";
     private int SOLAR_RADIUS = 50;
     private int SOLAR_POSITION_X = 50;
     private int SOLAR_POSITION_Y = 50;
@@ -140,18 +143,60 @@ public class HandlingEvents implements Runnable {
             e.printStackTrace();
         }
 
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(POWER)));
+            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.090 * SCREEN_WIDTH), (int)(0.80 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(POWER)));
+            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.8 * SCREEN_WIDTH), (int)(0.80 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(HEARTH)));
+            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.090 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(HEARTH)));
+            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.8 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(ANGLE)));
+            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.0908 * SCREEN_WIDTH), (int)(0.907 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            spriteSheet = new SpriteSheet(ImageIO.read(new File(ANGLE)));
+            g.drawImage(spriteSheet.crop(0,0,80, 80), (int)(0.805 * SCREEN_WIDTH), (int)(0.907 * SCREEN_HEIGHT), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         g.setColor(Color.BLACK);
         g.setFont(new Font("Times New Roman", 10, 30));
 
 
-        g.drawString("Health: " + player1.health, (int)(0.1 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
-        g.drawString("Health: " + player2.health, (int)(0.8 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
+        g.drawString("" + player1.health, (int)(0.13 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
+        g.drawString("" + player2.health, (int)(0.84 * SCREEN_WIDTH), (int)(0.9 * SCREEN_HEIGHT));
 
-        g.drawString("Power: " + player1.myVelocity, (int)(0.1 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
-        g.drawString("Power: " + player2.myVelocity, (int)(0.8 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
+        g.drawString(""+player1.myVelocity, (int)(0.13 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
+        g.drawString(""+player2.myVelocity, (int)(0.84 * SCREEN_WIDTH), (int)(0.85 * SCREEN_HEIGHT));
 
-        g.drawString("Angle: " + player1.myAngle, (int)(0.1 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
-        g.drawString("Angle: " + player2.myAngle, (int)(0.8 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
+        g.drawString("" + player1.myAngle, (int)(0.13 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
+        g.drawString("" + (180-player2.myAngle), (int)(0.84 * SCREEN_WIDTH), (int)(0.95 * SCREEN_HEIGHT));
 
         bufferStrategy.show();
     }
