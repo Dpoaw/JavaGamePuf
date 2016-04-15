@@ -54,12 +54,6 @@ public class InputHandler implements KeyListener {
                 Player02.powerDown = true;
             }
         }
-//        if (keyCode == KeyEvent.VK_W) {
-//            Game.turn = false;
-//        }
-//        if (keyCode == KeyEvent.VK_S) {
-//            Game.turn = true;
-//        }
     }
 
     @Override

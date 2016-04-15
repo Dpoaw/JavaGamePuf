@@ -22,18 +22,24 @@ public class Game implements Runnable {
     public static boolean fire = false;
     public static boolean turn = true;
     public static boolean bulletCreated = false;
+    private boolean explosion = false;
 
     private BufferStrategy buffStrat;
     private Graphics graphics;
     private SpriteSheet spriteSheet;
 
-    private int playerWidth = 94;
+    private int playerWidth = 95;
     private int playerHeight = 94;
     private int playerHeight02 = 94;
     private int playerWidth02 = 95;
 
     private int playerX01 = 100;
     private int playerX02 = 1_100;
+
+    private int explosionX;
+    private int explosionY;
+    private int iterator = 0;
+    private int cols = 0;
     private int counter = 0;
 
     public static int[] groundPoints = new int[1_200];
@@ -53,7 +59,7 @@ public class Game implements Runnable {
     private void init() {
         this.display = new Display(this.title, this.width, this.height);
         this.display.getCanvas().requestFocus();  //making display focusable
-
+        this.spriteSheet = new SpriteSheet(ImageLoader.load("/images/explosion.png"));
         this.inputHandler = new InputHandler(this.display);
 
         //defining ground
@@ -70,37 +76,109 @@ public class Game implements Runnable {
         if (this.bulletCreated) {
             this.bullet.tick();
         }
+
+        if (this.explosion) {
+            this.iterator++;
+            if (this.iterator == 7) {
+                this.iterator = 0;
+                this.cols++;
+            }
+        }
+        if (this.cols == 6) {
+            this.explosion = false;
+            this.iterator = 0;
+            this.cols = 0;
+        }
         //if bullet has hitted ground -> we call redefineGroung() method, change players turn and delete bullet
         if ((this.bullet.xCoord >= 0 && this.bullet.xCoord <= this.groundPoints.length - 1) || this.bullet.yCoord >= 0) {
             if (this.bulletCreated && this.turn && this.bullet.yCoord >= this.groundPoints[this.bullet.xCoord]) {
                 redefineGround();
                 this.turn = false;
                 this.bulletCreated = false;
+                //creating explosion
+                this.explosionX = this.bullet.xCoord;
+                this.explosionY = this.bullet.yCoord;
+                this.explosion = true;
                 //stop moving player, because his turn is over
                 this.player01.isMovingLeft01 = false;
                 this.player01.isMovingRight01 = false;
                 this.player01.isMovingUp01 = false;
                 this.player01.isMovingDown01 = false;
+                this.bullet.xCoord = 0;
+                this.bullet.yCoord = 0;
             } else if (this.bulletCreated && !this.turn && this.bullet.yCoord >= this.groundPoints[this.bullet.xCoord]) {
                 redefineGround();
                 this.turn = true;
                 this.bulletCreated = false;
+                //creating explosion
+                this.explosionX = this.bullet.xCoord;
+                this.explosionY = this.bullet.yCoord;
+                this.explosion = true;
                 //stop moving player, because his turn is over
                 this.player02.isMovingLeft02 = false;
                 this.player02.isMovingRight02 = false;
                 this.player02.isMovingUp02 = false;
                 this.player02.isMovingDown02 = false;
+                this.bullet.xCoord = 0;
+                this.bullet.yCoord = 0;
             }
         }
-        //this formula to check if player is hitted DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> condition is always TRUE
-        if (Math.pow((this.player02.x-this.bullet.xCoord),2)+Math.pow((this.player02.y-this.bullet.yCoord),2)<=2500) {
-            this.bulletCreated = false;
-            this.player01.health -= 20;
 
-        }
-        if (Math.pow((this.player01.x-this.bullet.xCoord),2)+Math.pow((this.player01.y-this.bullet.yCoord),2)<=2500) {
+        if (Math.pow((this.player01.x - this.bullet.xCoord), 2) + Math.pow((this.groundPoints[this.player01.x] - this.bullet.yCoord), 2) <= 2500) {
+            this.player01.health -= 10;//decreasing player's health
+            //again creating explosion
+            this.explosionX = this.player01.x - 20;
+            this.explosionY = this.player01.y - 40;
+            this.explosion = true;
+            this.bullet.xCoord = 0;//changing coordinates of bullet to stop decreasing player's health
+            this.bullet.yCoord = 0;//changing coordinates of bullet to stop decreasing player's health
             this.bulletCreated = false;
-            this.player02.health -= 20;
+            this.turn = !this.turn;//changing player's turn
+            //stop moving player, because his turn is over
+            this.player01.isMovingLeft01 = false;
+            this.player01.isMovingRight01 = false;
+            this.player01.isMovingUp01 = false;
+            this.player01.isMovingDown01 = false;
+
+            //this formula to check if player is hitted DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> condition is always TRUE
+//        if (Math.sqrt((this.player01.x - this.bullet.xCoord)) + Math.sqrt((this.groundPoints[this.player01.x] - this.bullet.yCoord)) <= 500) {
+//            //this.player01.health -= 20;
+//            //this.bulletCreated = false;
+//
+//        //this formula to check if player is hitted DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> condition is always TRUE
+//        if (Math.pow((this.player02.x-this.bullet.xCoord),2)+Math.pow((this.player02.y-this.bullet.yCoord),2)<=2500) {
+//            this.bulletCreated = false;
+//            this.player01.health -= 20;
+//
+//
+//        }
+
+            if (Math.pow((this.player02.x - this.bullet.xCoord), 2) + Math.pow((this.groundPoints[this.player02.x] - this.bullet.yCoord), 2) <= 2500) {
+                this.player02.health -= 10;
+                //again creating explosion
+                this.explosionX = this.player02.x - 20;
+                this.explosionY = this.player02.y - 40;
+                this.explosion = true;
+                this.bullet.xCoord = 0;
+                this.bullet.yCoord = 0;
+                this.bulletCreated = false;
+                this.turn = !this.turn;
+                this.player02.isMovingLeft02 = false;
+                this.player02.isMovingRight02 = false;
+                this.player02.isMovingUp02 = false;
+                this.player02.isMovingDown02 = false;
+            }
+
+
+//        if (Math.sqrt((this.player02.x - this.bullet.xCoord)) + Math.sqrt((this.groundPoints[this.player02.x] - this.bullet.yCoord)) <= 500) {
+//            //this.player02.health -= 20;
+//            //this.bulletCreated = false;
+//
+//        if (Math.pow((this.player01.x-this.bullet.xCoord),2)+Math.pow((this.player01.y-this.bullet.yCoord),2)<=2500) {
+//            this.bulletCreated = false;
+//            this.player02.health -= 20;
+//
+//        }
         }
     }
 
@@ -115,9 +193,10 @@ public class Game implements Runnable {
         this.graphics = this.buffStrat.getDrawGraphics();
         this.graphics.clearRect(0, 0, this.width, this.height);
         //START DRAWING
-        this.graphics.setColor(Color.cyan);
-        this.graphics.fillRect(0, 0, this.width, this.height);
+        //this.graphics.setColor(Color.cyan);
+        //this.graphics.fillRect(0, 0, this.width, this.height);
 
+        this.graphics.drawImage(ImageLoader.load("/images/back.jpg"), 0, 0, null);
         //this.graphics.drawImage(ImageLoader.load("/images/back.jpg"), 0, 0, null);//drawing background ->
         // maybe without this, or picture with smaller resolution
         //drawing random ground
@@ -142,10 +221,18 @@ public class Game implements Runnable {
             this.graphics.fillOval(this.player02.x + 30, this.groundPoints[this.player02.x] - 50, 10, 10);
         }
         //drawing players
-        this.player01.render(this.graphics);//here we call player01 -> he draws itself, counts his current condition with his tick() method
+        this.player01.render(this.graphics);//here we call player -> he draws itself, counts his current condition with his tick() method
         this.player02.render(this.graphics);// -> player02
+
+        //drawing explsion if it's created
+        if (this.explosion) {
+            this.graphics.drawImage(this.spriteSheet.crop(this.iterator * 79, this.cols * 79, 79, 79), this.explosionX, this.explosionY, null);
+        }
+
+
         //this.graphics.drawRect(this.player01.x-60,this.groundPoints[this.player01.x]-50, 100,50);
         //this.graphics.drawRect(this.player02.x-60, this.groundPoints[this.player02.x]-50,100,50);
+
         //drawing bullet, if it has been created!!! -> to avoid exceptions
         if (this.bulletCreated) {
             this.bullet.render(graphics);
@@ -192,11 +279,11 @@ public class Game implements Runnable {
         while (isRunning) {
 
             if (this.fire && this.turn) {
-                this.bullet = new Bullet(this.player01.x, this.player01.i * 5, this.player01.strength, this.groundPoints);
+                this.bullet = new Bullet(this.player01.x, (this.player01.i + 1) * 5, this.player01.strength, this.groundPoints);
                 this.bulletCreated = true;
             }
             if (this.fire && !this.turn) {
-                this.bullet = new Bullet(this.player02.x, this.player02.i * 5 + 110, this.player02.strength, this.groundPoints);
+                this.bullet = new Bullet(this.player02.x, (this.player02.i + 1) * 5 + 90, this.player02.strength, this.groundPoints);
                 this.bulletCreated = true;
             }
 

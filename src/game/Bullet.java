@@ -34,8 +34,8 @@ public class Bullet {
         yCoord = (int) (y0 + vY * this.time / 10.0 - gAcc * Math.pow(this.time / 10.0, 2));
 
         //REDEFINE GROUND
-        int p1X = Player01.x;
-        int p2X = Player02.x;
+        int p1X = Game.player01.x;
+        int p2X = Game.player02.x;
         boolean condition = ((p1X - xCoord) * (p1X - xCoord) + (ground[p1X] - yCoord) * (ground[p1X] - yCoord) <= 500) ||
                 (p2X - xCoord) * (p2X - xCoord) + (ground[p2X] - yCoord) * (ground[p2X] - yCoord) <= 500;
         System.out.println(condition);
