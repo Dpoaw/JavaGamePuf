@@ -35,6 +35,7 @@ public class HandlingEvents implements Runnable {
     private int SCREEN_WIDTH = 1200;
     private int SCREEN_HEIGHT = 700;
     private int IMPACT_RADIUS = 50;
+    private double DELAY_FACTOR = 3.0;
 
     private boolean fire = false;
     int time = 0;
@@ -215,13 +216,13 @@ public class HandlingEvents implements Runnable {
 
         double gAcc = -9.80665; // Earth's gravity acceleration
 
-        int xCoord = (int) (x0 + (vX * vTerminal / gAcc) * (1 - Math.exp((-gAcc * time / 10.0) / vTerminal)));
-        int yCoord = (int) (y0 + (vTerminal / gAcc) * (vY + vTerminal) * (1 - Math.exp((-gAcc * time / 10.0) / vTerminal)) - vTerminal * time / 10.0);
+        int xCoord = (int) (x0 + (vX * vTerminal / gAcc) * (1 - Math.exp((-gAcc * time / DELAY_FACTOR) / vTerminal)));
+        int yCoord = (int) (y0 + (vTerminal / gAcc) * (vY + vTerminal) * (1 - Math.exp((-gAcc * time / DELAY_FACTOR) / vTerminal)) - vTerminal * time / DELAY_FACTOR);
 
         //the current velocity; current[0] is x component, current[1] is y component
         int[] currentVelocity = new int[] {
-                (int) ((vX / 10) * Math.exp(-gAcc * time / (10.0 * vTerminal))),
-                (int) (-vTerminal / 10.0 + ((vY + vTerminal) / 10.0) * Math.exp(-gAcc * time / (10.0 * vTerminal)))};
+                (int) ((vX / DELAY_FACTOR) * Math.exp(-gAcc * time / (DELAY_FACTOR * vTerminal))),
+                (int) (-vTerminal / DELAY_FACTOR + ((vY + vTerminal) / DELAY_FACTOR) * Math.exp(-gAcc * time / (DELAY_FACTOR * vTerminal)))};
 
         int[] normalVectorPlayer1 = new int[]{xCoord - player1.myX, yCoord - ground[player1.myX]};
         int[] normalVectorPlayer2 = new int[]{xCoord - player2.myX, yCoord - ground[player2.myX]};
