@@ -34,6 +34,7 @@ public class HandlingEvents implements Runnable {
     private int BALL_OFFSET_Y = 15;
     private int SCREEN_WIDTH = 1200;
     private int SCREEN_HEIGHT = 700;
+    private int IMPACT_RADIUS = 50;
 
     private boolean fire = false;
     int time = 0;
@@ -150,12 +151,6 @@ public class HandlingEvents implements Runnable {
         try {
             spriteSheet = new SpriteSheet(ImageIO.read(new File(POWER)));
             g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.090 * SCREEN_WIDTH), (int) (0.80 * SCREEN_HEIGHT), null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            spriteSheet = new SpriteSheet(ImageIO.read(new File(POWER)));
             g.drawImage(spriteSheet.crop(0, 0, 80, 80), (int) (0.8 * SCREEN_WIDTH), (int) (0.80 * SCREEN_HEIGHT), null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -198,19 +193,17 @@ public class HandlingEvents implements Runnable {
 
 
     public int[] ballCoord() {
-        int playerX0, playerAngle0, playerVelocity0, fireBullet;
+        int playerX0, playerAngle0, playerVelocity0;
 
         if (player1Shooting) {
             playerX0 = player1.myX0;
             playerAngle0 = player1.myAngle0;
             playerVelocity0 = player1.myVelocity0;
 
-
         } else {
             playerX0 = player2.myX0;
             playerAngle0 = player2.myAngle0;
             playerVelocity0 = player2.myVelocity0;
-
 
         }
 
@@ -225,34 +218,35 @@ public class HandlingEvents implements Runnable {
         int xCoord = (int) (x0 + (vX * vTerminal / gAcc) * (1 - Math.exp((-gAcc * time / 10.0) / vTerminal)));
         int yCoord = (int) (y0 + (vTerminal / gAcc) * (vY + vTerminal) * (1 - Math.exp((-gAcc * time / 10.0) / vTerminal)) - vTerminal * time / 10.0);
 
-        //REDEFINE GROUND
+        //the current velocity; current[0] is x component, current[1] is y component
+        int[] currentVelocity = new int[] {
+                (int) ((vX / 10) * Math.exp(-gAcc * time / (10.0 * vTerminal))),
+                (int) (-vTerminal / 10.0 + ((vY + vTerminal) / 10.0) * Math.exp(-gAcc * time / (10.0 * vTerminal)))};
 
-//        boolean condition =
-//                        ((xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50) &&
-//                        (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) ||
-//                        ((xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) &&
-//                                (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50));
-        //condition = false;
-        //System.out.println(condition);
+        int[] normalVectorPlayer1 = new int[]{xCoord - player1.myX, yCoord - ground[player1.myX]};
+        int[] normalVectorPlayer2 = new int[]{xCoord - player2.myX, yCoord - ground[player2.myX]};
 
+        // Check whether the ball is within the Impact radius of a player and if the velocity vector points toward the bounding circle of the same player
+        boolean isPlayer1Hit = (Math.pow((player1.myX - xCoord), 2) + Math.pow((ground[player1.myX] - yCoord), 2) <= Math.pow(IMPACT_RADIUS, 2)) &&
+                (normalVectorPlayer1[0] * currentVelocity[0] + normalVectorPlayer1[1] * currentVelocity[1] < 0);
+        boolean isPlayer2Hit = (Math.pow((player2.myX - xCoord), 2) + Math.pow((ground[player2.myX] - yCoord), 2) <= Math.pow(IMPACT_RADIUS, 2)) &&
+                (normalVectorPlayer2[0] * currentVelocity[0] + normalVectorPlayer2[1] * currentVelocity[1] < 0);
 
-        if (fire && (yCoord >= ground[xCoord])) {
+        // The ball hits the ground or one of the players
+        if (fire && (yCoord >= ground[xCoord] || isPlayer1Hit || isPlayer2Hit)) {
             fire = false;
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
             }
             //if bullet is in area of player1
-            if (!player1Shooting && (xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50)
-                    && (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) {
+            if (isPlayer1Hit) {
                 player1.health -= 20;
-            } else {
-                //if bullet is in area of player2
-                if (player1Shooting &&(xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) && (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50)) {
-                    player2.health -= 20;
-                }
+            }
+            if (isPlayer2Hit) {
+                player2.health -= 20;
             }
 
-            player1Shooting = !player1Shooting; // Now the other paper is shooting
+            player1Shooting = !player1Shooting; // Now the other tank is shooting
         }
 
         int[] temp = new int[]{xCoord, yCoord};
