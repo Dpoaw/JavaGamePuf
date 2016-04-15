@@ -204,13 +204,13 @@ public class HandlingEvents implements Runnable {
             playerX0 = player1.myX0;
             playerAngle0 = player1.myAngle0;
             playerVelocity0 = player1.myVelocity0;
-            fireBullet=1;
+
 
         } else {
             playerX0 = player2.myX0;
             playerAngle0 = player2.myAngle0;
             playerVelocity0 = player2.myVelocity0;
-            fireBullet=2;
+
 
         }
 
@@ -227,27 +227,27 @@ public class HandlingEvents implements Runnable {
 
         //REDEFINE GROUND
 
-        boolean condition =
-                        ((xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50) &&
-                        (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) ||
-                        ((xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) &&
-                                (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50));
+//        boolean condition =
+//                        ((xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50) &&
+//                        (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) ||
+//                        ((xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) &&
+//                                (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50));
         //condition = false;
-        System.out.println(condition);
+        //System.out.println(condition);
 
 
-        if (fire && (yCoord >= ground[xCoord] || condition)) {
+        if (fire && (yCoord >= ground[xCoord])) {
             fire = false;
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 ground[x] += 50 * Math.exp(-Math.pow((x - xCoord), 2) / 2000.0);
             }
             //if bullet is in area of player1
-            if ((fireBullet==2) && (xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50)
+            if (!player1Shooting && (xCoord <= player1.myX + 50) && (xCoord >= player1.myX - 50)
                     && (yCoord >= ground[player1.myX] - 50) && (yCoord <= ground[player1.myX] + 50)) {
                 player1.health -= 20;
             } else {
                 //if bullet is in area of player2
-                if ((fireBullet==1)&&(xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) && (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50)) {
+                if (player1Shooting &&(xCoord <= player2.myX + 50) && (xCoord >= player2.myX - 50) && (yCoord >= ground[player2.myX] - 50) && (yCoord <= ground[player2.myX] + 50)) {
                     player2.health -= 20;
                 }
             }
